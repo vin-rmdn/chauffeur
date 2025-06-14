@@ -36,6 +36,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.4.5")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.4.5")
     implementation("de.kherud:llama:4.1.0")
+
+    implementation("org.jsoup:jsoup:1.20.1")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
