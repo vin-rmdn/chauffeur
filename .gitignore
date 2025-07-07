@@ -7,3 +7,6 @@ build
 # Gradle Wrapper
 gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
+
+.idea
+**/application.yml

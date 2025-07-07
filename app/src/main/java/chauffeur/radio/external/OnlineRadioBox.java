@@ -1,4 +1,4 @@
-package chauffeur.radio;
+package chauffeur.radio.external;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,11 +15,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Repository {
+public class OnlineRadioBox {
     private String host;
     private HttpClient httpClient;
 
-    private static final Logger logger = LoggerFactory.getLogger(Repository.class);
+    private static final Logger logger = LoggerFactory.getLogger(OnlineRadioBox.class);
 
     public static class InvalidFormatException extends Exception {
         public InvalidFormatException(String message) {
@@ -61,11 +61,11 @@ public class Repository {
         }
     }
 
-    public Repository(String host) {
+    public OnlineRadioBox(String host) {
         this(host, HttpClient.newHttpClient());
     }
 
-    public Repository(String host, HttpClient httpClient) {
+    public OnlineRadioBox(String host, HttpClient httpClient) {
         this.host = host;
         this.httpClient = httpClient;
     }

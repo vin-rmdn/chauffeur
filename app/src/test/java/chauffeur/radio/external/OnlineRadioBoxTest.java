@@ -1,4 +1,4 @@
-package chauffeur.radio;
+package chauffeur.radio.external;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,14 +22,15 @@ import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 
-import chauffeur.radio.Repository.Song;
+import chauffeur.radio.external.OnlineRadioBox;
+import chauffeur.radio.external.OnlineRadioBox.Song;
 
-public class RepositoryTest {
+public class OnlineRadioBoxTest {
     HttpClient mockHttpClient = mock(HttpClient.class);
 
     final String host = "http://fakehost"; // TODO: use fake host instead
 
-    Repository classUnderTest = new Repository(host, mockHttpClient);
+    OnlineRadioBox classUnderTest = new OnlineRadioBox(host, mockHttpClient);
 
     @SuppressWarnings("unlikely-arg-type")
     @Test
