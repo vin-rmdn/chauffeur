@@ -38,6 +38,7 @@ dependencies {
     implementation("de.kherud:llama:4.1.0")
 
     implementation("org.jsoup:jsoup:1.20.1")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.19.1")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -55,6 +56,8 @@ application {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
 
 tasks {
