@@ -1,21 +1,20 @@
-package chauffeur.radio;
+package chauffeur.controller;
 
+import java.io.IOException;
 import java.util.List;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import chauffeur.radio.external.OnlineRadioBox;
 import chauffeur.radio.external.OnlineRadioBox.SongRecord;
 
-@Controller
-public class RadioController {
+@RestController
+public class Radio {
+    @Autowired
     OnlineRadioBox onlineRadioBox;
-
-    public RadioController(OnlineRadioBox onlineRadioBox) {
-        this.onlineRadioBox = onlineRadioBox;
-    }
 
     public static class RadioPlaylistResponse {
         public String id;
@@ -27,7 +26,7 @@ public class RadioController {
     }
 
     @GetMapping("/radio/status/{id}")
-    public RadioPlaylistResponse GetRadioPlaylist(@PathVariable(name = "id") String id) {
+    public RadioPlaylistResponse GetRadioPlaylist(@PathVariable(name = "id") String id) throws Exception {
         RadioPlaylistResponse response = new RadioPlaylistResponse(id);
         response.playlist = this.onlineRadioBox.getPlaylist(id);
 

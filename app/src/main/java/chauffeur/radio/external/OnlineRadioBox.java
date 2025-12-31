@@ -2,6 +2,7 @@ package chauffeur.radio.external;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -16,15 +17,23 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.client.HttpServerErrorException;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
+@Repository
 public class OnlineRadioBox {
     private String host;
     private HttpClient httpClient;
 
     private static final Logger logger = LoggerFactory.getLogger(OnlineRadioBox.class);
+    private ObjectMapper mapper;
 
     public static class InvalidFormatException extends Exception {
         public InvalidFormatException(String message) {
@@ -33,8 +42,8 @@ public class OnlineRadioBox {
     }
 
     public static class SongRecord {
-        Song song;
-        String playedAt; // TODO: change to datetime
+        public Song song;
+        public String playedAt; // TODO: change to datetime
 
         public SongRecord(Song song, String playedAt) {
             this.song = song;
@@ -43,8 +52,8 @@ public class OnlineRadioBox {
     }
 
     public static class Song {
-        String title;
-        String artist;
+        public String title;
+        public String artist;
 
         public Song(String artist, String title) {
             this.artist = artist;
@@ -76,11 +85,15 @@ public class OnlineRadioBox {
         }
     }
 
-    public OnlineRadioBox(String host) {
+    @Autowired
+    public OnlineRadioBox(@Value("${online_radio_box.host}") String host) {
         this(host, HttpClient.newHttpClient());
     }
 
     public OnlineRadioBox(String host, HttpClient httpClient) {
+        mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
         this.host = host;
         this.httpClient = httpClient;
     }
@@ -122,7 +135,7 @@ public class OnlineRadioBox {
         return trackLists;
     }
 
-    public List<SongRecord> getPlaylist(String id) {
+    public List<SongRecord> getPlaylist(String id) throws IOException, InterruptedException, URISyntaxException {
         PlaylistAPIResponse response = callPlaylistAPI(id);
 
         Document doc = Jsoup.parse(response.data);
@@ -135,7 +148,7 @@ public class OnlineRadioBox {
                 song = new Song(element.select("td.track_history_item").text());
             } catch (InvalidFormatException e) {
                 logger.atWarn().addKeyValue("inputString", element.select("td.track_history_item").text())
-                        .log("unable to parse into Song");
+                        .log("unable to parse into Song"); // TODO: iron out empty songs issue
 
                 return;
             }
@@ -153,37 +166,19 @@ public class OnlineRadioBox {
         public String data;
     }
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    private PlaylistAPIResponse callPlaylistAPI(String id) {
-        URI uri;
-        try {
-            uri = new URI(String.format("%s/id/%s/playlist/%s", this.host, id, "ajax=1&tzLoc=Asia/Jakarta"));
-        } catch (Exception e) {
-            logger.atError().addKeyValue("exception", e).log("failed to create uri");
-
-            return null;
-        }
+    private PlaylistAPIResponse callPlaylistAPI(String id)
+            throws IOException, InterruptedException, URISyntaxException {
+        URI uri = new URI(String.format("%s/id/%s/playlist/?%s", this.host, id, "ajax=1&tzLoc=Asia/Jakarta"));
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().timeout(Duration.ofSeconds(10)).build();
+        HttpResponse<String> httpResponse = this.httpClient.send(request, BodyHandlers.ofString());
 
-        HttpResponse<String> httpResponse;
-        try {
-            httpResponse = this.httpClient.send(request, BodyHandlers.ofString());
-        } catch (Exception e) {
-            logger.atError().addKeyValue("exception", e).log("failed to execute http");
-
-            return null;
+        if (httpResponse.statusCode() != 200) {
+            int statusCode = httpResponse.statusCode();
+            throw new HttpServerErrorException(HttpStatusCode.valueOf(statusCode));
         }
 
-        PlaylistAPIResponse response;
-        try {
-            response = mapper.readValue(httpResponse.body(), PlaylistAPIResponse.class);
-        } catch (Exception e) {
-            logger.atError().addKeyValue("exception", e).log("failed to parse response body");
-
-            return null;
-        }
+        PlaylistAPIResponse response = mapper.readValue(httpResponse.body(), PlaylistAPIResponse.class);
 
         return response;
     }
