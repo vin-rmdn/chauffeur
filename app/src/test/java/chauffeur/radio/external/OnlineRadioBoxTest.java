@@ -18,12 +18,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 
-import chauffeur.radio.external.OnlineRadioBox;
 import chauffeur.radio.external.OnlineRadioBox.Song;
+import chauffeur.radio.external.OnlineRadioBox.SongRecord;
 
 public class OnlineRadioBoxTest {
     HttpClient mockHttpClient = mock(HttpClient.class);
@@ -116,5 +117,34 @@ public class OnlineRadioBoxTest {
                         new Song("SAVAGE GARDEN", "TO THE MOON & BACK"),
                         new Song("TINA TURNER", "BETTER BE GOOD TO ME")),
                 trackLists);
+    }
+
+    @Test
+    void TestGetPlaylist() {
+        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+
+        try {
+            when(mockHttpClient.<String>send(any(), any())).thenReturn(mockResponse);
+        } catch (Exception e) {
+            fail("Exception caught");
+        }
+
+        InputStream responseStream = getClass().getClassLoader()
+                .getResourceAsStream("responses/online-radio-box-valid-response-ajax.json");
+        if (responseStream == null)
+            throw new RuntimeException("Test response file not found");
+
+        try (Scanner scanner = new Scanner(responseStream, StandardCharsets.UTF_8.name())) {
+            String response = scanner.useDelimiter("\\A").next();
+            when(mockResponse.body()).thenReturn(response);
+        }
+        
+        List<SongRecord> songRecords = classUnderTest.getPlaylist("playlist-id");
+
+        assertNotNull(songRecords);
+
+        songRecords.forEach(songRecord -> {
+            System.out.printf("%s: %s - %s%n", songRecord.playedAt, songRecord.song.artist, songRecord.song.title);
+        });
     }
 }
