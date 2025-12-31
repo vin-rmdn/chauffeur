@@ -2,3 +2,8 @@ logging:
   level:
     root: DEBUG
     chauffeur.llm: DEBUG
+online_radio_box:
+  host: https://onlineradiobox.com
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
