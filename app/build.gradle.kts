@@ -11,6 +11,9 @@ plugins {
 
     // Spring Boot plugin
     id("org.springframework.boot") version "3.4.5"
+    id("io.spring.dependency-management") version "1.1.4"
+    id("java")
+
 }
 
 repositories {
@@ -69,7 +72,6 @@ tasks {
 tasks.bootJar {
     manifest {
         attributes(
-            "Main-Class" to "chauffeur.App",
             "Implementation-Title" to project.name,
             "Implementation-Version" to project.version,
             "Implementation-Vendor" to "vin-rmdn"
