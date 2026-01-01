@@ -22,10 +22,14 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import chauffeur.radio.external.OnlineRadioBox.Song;
 import chauffeur.radio.external.OnlineRadioBox.SongRecord;
 
+@ExtendWith(MockitoExtension.class)
 public class OnlineRadioBoxTest {
     HttpClient mockHttpClient = mock(HttpClient.class);
 
@@ -57,7 +61,6 @@ public class OnlineRadioBoxTest {
 
     @Test
     void TestRepository_GetPlaylist_Success_WithOneCorruptedSongFormat() throws IOException, InterruptedException {
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockHttpClient.<String>send(any(), any())).thenReturn(mockResponse);
 
         InputStream responseStream = getClass().getClassLoader()
@@ -86,9 +89,11 @@ public class OnlineRadioBoxTest {
                 trackLists);
     }
 
+    @Mock
+    HttpResponse<String> mockResponse;
+
     @Test
     void TestRepository_GetPlaylist_Successful() throws IOException, InterruptedException {
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockHttpClient.<String>send(any(), any())).thenReturn(mockResponse);
 
         InputStream responseStream = getClass().getClassLoader()
@@ -120,9 +125,7 @@ public class OnlineRadioBoxTest {
     }
 
     @Test
-    void TestGetPlaylist() {
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
-
+    void TestGetPlaylist() throws Exception {
         try {
             when(mockHttpClient.<String>send(any(), any())).thenReturn(mockResponse);
         } catch (Exception e) {
@@ -138,7 +141,9 @@ public class OnlineRadioBoxTest {
             String response = scanner.useDelimiter("\\A").next();
             when(mockResponse.body()).thenReturn(response);
         }
-        
+
+        when(mockResponse.statusCode()).thenReturn(200);
+
         List<SongRecord> songRecords = classUnderTest.getPlaylist("playlist-id");
 
         assertNotNull(songRecords);
