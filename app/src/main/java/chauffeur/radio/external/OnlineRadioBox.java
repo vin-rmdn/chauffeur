@@ -7,8 +7,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -135,8 +137,8 @@ public class OnlineRadioBox {
         return trackLists;
     }
 
-    public List<SongRecord> getPlaylist(String id) throws IOException, InterruptedException, URISyntaxException {
-        PlaylistAPIResponse response = callPlaylistAPI(id);
+    public List<SongRecord> getPlaylist(String id, int dayOffset) throws IOException, InterruptedException, URISyntaxException {
+        PlaylistAPIResponse response = callPlaylistAPI(id, dayOffset);
 
         Document doc = Jsoup.parse(response.data);
         Elements elements = doc.select("tr");
@@ -166,9 +168,12 @@ public class OnlineRadioBox {
         public String data;
     }
 
-    private PlaylistAPIResponse callPlaylistAPI(String id)
+    private PlaylistAPIResponse callPlaylistAPI(String id, int dayOffset)
             throws IOException, InterruptedException, URISyntaxException {
-        URI uri = new URI(String.format("%s/id/%s/playlist/?%s", this.host, id, "ajax=1&tzLoc=Asia/Jakarta"));
+        String dayOffsetURI = (dayOffset != 0) ? String.valueOf(dayOffset) : "";
+
+        URI uri = new URI(
+                String.format("%s/id/%s/playlist/%s?%s", this.host, id, dayOffsetURI, "ajax=1&tzLoc=Asia/Jakarta"));
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().timeout(Duration.ofSeconds(10)).build();
         HttpResponse<String> httpResponse = this.httpClient.send(request, BodyHandlers.ofString());

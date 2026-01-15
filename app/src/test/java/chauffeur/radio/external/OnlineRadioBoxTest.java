@@ -23,6 +23,7 @@ import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -125,9 +126,11 @@ public class OnlineRadioBoxTest {
     }
 
     @Test
-    void TestGetPlaylist() throws Exception {
+    void TestGetPlaylist_Successful_Today() throws Exception {
+        ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
+
         try {
-            when(mockHttpClient.<String>send(any(), any())).thenReturn(mockResponse);
+            when(mockHttpClient.<String>send(captor.capture(), any())).thenReturn(mockResponse);
         } catch (Exception e) {
             fail("Exception caught");
         }
@@ -144,7 +147,46 @@ public class OnlineRadioBoxTest {
 
         when(mockResponse.statusCode()).thenReturn(200);
 
-        List<SongRecord> songRecords = classUnderTest.getPlaylist("playlist-id");
+        List<SongRecord> songRecords = classUnderTest.getPlaylist("playlist-id", 0);
+
+        HttpRequest actualRequest = captor.getValue();
+        assertEquals("http://fakehost/id/playlist-id/playlist/?ajax=1&tzLoc=Asia/Jakarta",
+                actualRequest.uri().toString());
+
+        assertNotNull(songRecords);
+
+        songRecords.forEach(songRecord -> {
+            System.out.printf("%s: %s - %s%n", songRecord.playedAt, songRecord.song.artist, songRecord.song.title);
+        });
+    }
+
+    @Test
+    void TestGetPlaylist_Successful_Yesterday() throws Exception {
+        ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
+
+        try {
+            when(mockHttpClient.<String>send(captor.capture(), any())).thenReturn(mockResponse);
+        } catch (Exception e) {
+            fail("Exception caught");
+        }
+
+        InputStream responseStream = getClass().getClassLoader()
+                .getResourceAsStream("responses/online-radio-box-valid-response-ajax.json");
+        if (responseStream == null)
+            throw new RuntimeException("Test response file not found");
+
+        try (Scanner scanner = new Scanner(responseStream, StandardCharsets.UTF_8.name())) {
+            String response = scanner.useDelimiter("\\A").next();
+            when(mockResponse.body()).thenReturn(response);
+        }
+
+        when(mockResponse.statusCode()).thenReturn(200);
+
+        List<SongRecord> songRecords = classUnderTest.getPlaylist("playlist-id", 1);
+
+        HttpRequest actualRequest = captor.getValue();
+        assertEquals("http://fakehost/id/playlist-id/playlist/1?ajax=1&tzLoc=Asia/Jakarta",
+                actualRequest.uri().toString());
 
         assertNotNull(songRecords);
 

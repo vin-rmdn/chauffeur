@@ -1,6 +1,5 @@
 package chauffeur.controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class Radio {
     @GetMapping("/radio/status/{id}")
     public RadioPlaylistResponse GetRadioPlaylist(@PathVariable(name = "id") String id) throws Exception {
         RadioPlaylistResponse response = new RadioPlaylistResponse(id);
-        response.playlist = this.onlineRadioBox.getPlaylist(id);
+        response.playlist = this.onlineRadioBox.getPlaylist(id, 0);
 
         return response;
     }
