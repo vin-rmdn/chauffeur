@@ -7,10 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -137,23 +135,22 @@ public class OnlineRadioBox {
         return trackLists;
     }
 
-    public List<SongRecord> getPlaylist(String id, int dayOffset) throws IOException, InterruptedException, URISyntaxException {
+    public List<SongRecord> getPlaylist(String id, int dayOffset)
+            throws IOException, InterruptedException, URISyntaxException {
         PlaylistAPIResponse response = callPlaylistAPI(id, dayOffset);
 
         Document doc = Jsoup.parse(response.data);
-        Elements elements = doc.select("tr");
+        Elements elements = doc.selectFirst("table.tablelist-schedule").select("tr");
 
         List<SongRecord> trackLists = new ArrayList<>();
         elements.forEach(element -> {
-            Song song;
-            try {
-                song = new Song(element.select("td.track_history_item").text());
-            } catch (InvalidFormatException e) {
-                logger.atWarn().addKeyValue("inputString", element.select("td.track_history_item").text())
-                        .log("unable to parse into Song"); // TODO: iron out empty songs issue
+            logger.atInfo().addKeyValue("raw_element", element.html()).log("raw track history item received");
 
-                return;
-            }
+            String segmentText = element.select("td.track_history_item").text();
+            String[] segments = segmentText.split(" - ", 2);
+
+            Song song = (segments.length >= 2) ? new Song(segments[0], segments[1])
+                    : new Song("non-artist", segments[0]);
 
             trackLists.add(new SongRecord(
                     song,
@@ -183,7 +180,10 @@ public class OnlineRadioBox {
             throw new HttpServerErrorException(HttpStatusCode.valueOf(statusCode));
         }
 
-        PlaylistAPIResponse response = mapper.readValue(httpResponse.body(), PlaylistAPIResponse.class);
+        String responsePayload = httpResponse.body();
+        PlaylistAPIResponse response = mapper.readValue(responsePayload, PlaylistAPIResponse.class);
+
+        logger.atInfo().addKeyValue("response", responsePayload).log("received response");
 
         return response;
     }
