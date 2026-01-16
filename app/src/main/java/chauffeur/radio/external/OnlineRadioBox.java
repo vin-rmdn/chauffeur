@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,43 +95,6 @@ public class OnlineRadioBox {
 
         this.host = host;
         this.httpClient = httpClient;
-    }
-
-    public List<Song> GetPlaylist(String id) throws IOException, InterruptedException {
-        URI uri = URI.create(String.format("%s/id/%s/playlist/", this.host, id));
-        HttpRequest httpRequest = HttpRequest.newBuilder(uri).GET().build();
-
-        // TODO: add ajax=1 to parameter and adjust respose parsing
-
-        HttpResponse<String> response;
-
-        try {
-            response = this.httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            logger.atError().addKeyValue("exception", e).log("failed to execute http");
-
-            throw e;
-        }
-
-        Document doc = Jsoup.parse(response.body());
-        Elements elements = doc.select("td.track_history_item a");
-
-        List<Song> trackLists = new ArrayList<>();
-
-        for (Element element : elements) {
-            try {
-                Song song = new Song(element.text());
-
-                trackLists.add(song);
-            } catch (InvalidFormatException e) {
-                logger.atWarn().addKeyValue("inputString", element.text()).log("unable to parse into Song");
-
-                continue;
-            }
-
-        }
-
-        return trackLists;
     }
 
     public List<SongRecord> getPlaylist(String id, int dayOffset)
