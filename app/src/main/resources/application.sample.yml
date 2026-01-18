@@ -7,3 +7,6 @@ online_radio_box:
 spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
+radio:
+  excluded_artists: SWEEPER, foo
+  excluded_titles: spot, foo
