@@ -3,21 +3,16 @@ package chauffeur.radio.external;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -124,5 +119,11 @@ public class OnlineRadioBoxTest {
         songRecords.forEach(songRecord -> {
             System.out.printf("%s: %s - %s%n", songRecord.playedAt, songRecord.song.artist, songRecord.song.title);
         });
+    }
+
+    @Test
+    void TestSongRecord_toString() {
+        SongRecord record = new SongRecord(new Song("artist", "title"), "20:26");
+        assertEquals("artist - title (played at 20:26)", record.toString());
     }
 }

@@ -48,6 +48,10 @@ public class OnlineRadioBox {
             this.song = song;
             this.playedAt = playedAt;
         }
+
+        public String toString() {
+            return String.format("%s - %s (played at %s)", song.artist, song.title, playedAt);
+        }
     }
 
     public static class Song {
