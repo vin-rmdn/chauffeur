@@ -17,8 +17,7 @@ plugins {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
-    mavenCentral()
+    mavenCentral() // Use Maven Central for resolving dependencies.
 }
 
 val mockitoAgent = configurations.create("mockitoAgent")
@@ -28,10 +27,10 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito)
     testImplementation("org.mockito:mockito-junit-jupiter:5.17.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     
     mockitoAgent(libs.mockito) { isTransitive = false }
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // This dependency is used by the application.
     implementation(libs.guava)
@@ -57,16 +56,8 @@ application {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
-
-    jvmArgs("-javaagent:${mockitoAgent.asPath}")
-}
-
-tasks {
-    test {
-        jvmArgs("-javaagent:${mockitoAgent.asPath}")
-    }
+    useJUnitPlatform() // for unit tests.
+    jvmArgs("-javaagent:${mockitoAgent.singleFile}")
 }
 
 tasks.bootJar {
