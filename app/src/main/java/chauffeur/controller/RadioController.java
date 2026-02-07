@@ -1,7 +1,9 @@
 package chauffeur.controller;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +25,11 @@ public class RadioController {
 
     public static class RadioPlaylistResponse {
         public String id;
-        public List<SongRecord> playlist;
+        public Map<String, List<SongRecord>> playlists;
 
         public RadioPlaylistResponse(String id) {
             this.id = id;
-            this.playlist = new ArrayList<>();
+            this.playlists = new HashMap<>();
         }
     }
 
@@ -37,8 +39,12 @@ public class RadioController {
             @RequestParam(value = "day_offsets") List<Integer> dayOffsets) throws Exception {
         RadioPlaylistResponse response = new RadioPlaylistResponse(id);
 
-        for (Integer dayOffset : dayOffsets)
-            response.playlist.addAll(this.service.GetPlaylists(id, dayOffset));
+        LocalDate today = LocalDate.now();
+        for (Integer dayOffset : dayOffsets) {
+            LocalDate playlistDate = today.minusDays((long) dayOffset);
+
+            response.playlists.put(playlistDate.toString(), this.service.GetPlaylists(id, dayOffset));
+        }
 
         return response;
     }

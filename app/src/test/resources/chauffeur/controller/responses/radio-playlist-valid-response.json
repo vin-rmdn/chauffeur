@@ -1,0 +1,14 @@
+{
+    "id": "test-id",
+    "playlists": {
+        "2026-02-07": [
+            {
+                "song": {
+                    "title": "Title",
+                    "artist": "Artist"
+                },
+                "played_at": "09:00"
+            }
+        ]
+    }
+}

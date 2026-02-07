@@ -1,10 +1,14 @@
 package chauffeur.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -30,12 +34,15 @@ public class RadioTest {
         List<SongRecord> mockSongRecords = List.of(new SongRecord(new Song("Artist", "Title"), "09:00"));
         when(radioService.GetPlaylists("test-id", 0)).thenReturn(mockSongRecords);
 
+        String expectedContent = new String(
+                Files.readAllBytes(
+                        Paths.get(
+                                "src/test/resources/chauffeur/controller/responses/radio-playlist-valid-response.json")));
+        assertNotNull(expectedContent);
+
         mockMvc.perform(get("/radio/playlists/test-id")
                 .param("day_offsets", "0"))
                 .andExpect(status().isOk())
-                .andExpect(result -> {
-                    String content = result.getResponse().getContentAsString();
-                    assertNotNull(content);
-                });
+                .andExpect(content().json(expectedContent));
     }
 }
