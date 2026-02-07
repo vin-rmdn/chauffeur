@@ -4,5 +4,6 @@
         "app/src/test/java"
     ],
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "gradle.javaDebug.cleanOutput": true
 }
