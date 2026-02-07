@@ -78,6 +78,10 @@ tasks.register("setup") {
     }
     
     val targetFile = file("src/main/resources/application.yml")
-    sourceFile.copyTo(targetFile, overwrite = true)
-    println("Copied application.sample.yml to application.yml")
+    if (!targetFile.exists()) {
+        sourceFile.copyTo(targetFile, overwrite = false)
+        println("Copied application.sample.yml to application.yml")
+    } else {
+        println("application.yml already exists, skipping copy")
+    }
 }
