@@ -10,7 +10,7 @@ plugins {
     application
 
     // Spring Boot plugin
-    id("org.springframework.boot") version "3.4.5"
+    id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.4"
     id("java")
 
@@ -26,7 +26,7 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito)
-    testImplementation("org.mockito:mockito-junit-jupiter:5.17.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.21.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     
     mockitoAgent(libs.mockito) { isTransitive = false }
@@ -34,10 +34,10 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
-    implementation("org.springframework.boot:spring-boot-starter:3.4.5")
-    implementation("org.springframework.boot:spring-boot-starter-web:3.4.5")
-    implementation("org.springframework.boot:spring-boot-starter-validation:3.4.5")
-    implementation("org.springframework.boot:spring-boot-starter-test:3.4.5")
+    implementation("org.springframework.boot:spring-boot-starter:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-test:3.5.10")
     implementation("de.kherud:llama:4.1.0")
 
     implementation("org.jsoup:jsoup:1.20.1")
@@ -47,7 +47,7 @@ dependencies {
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -69,4 +69,15 @@ tasks.bootJar {
             "Implementation-Vendor" to "vin-rmdn"
         )
     }
+}
+
+tasks.register("setup") {
+    val sourceFile = file("src/main/resources/application.sample.yml")
+    if (!sourceFile.exists()) {
+        throw GradleException("Error: application.sample.yml not found")
+    }
+    
+    val targetFile = file("src/main/resources/application.yml")
+    sourceFile.copyTo(targetFile, overwrite = true)
+    println("Copied application.sample.yml to application.yml")
 }

@@ -4,7 +4,7 @@
 [versions]
 guava = "33.0.0-jre"
 junit-jupiter = "5.10.2"
-mockito = "5.17.0"
+mockito = "5.21.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
