@@ -10,3 +10,5 @@ gradle/wrapper/gradle-wrapper.jar
 
 .idea
 **/application.yml
+
+app/bin
