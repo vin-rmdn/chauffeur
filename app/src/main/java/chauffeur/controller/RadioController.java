@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import chauffeur.radio.RadioReviewService;
+import chauffeur.radio.RadioReviewService.RadioPlaylistReviewResponse;
 import chauffeur.radio.RadioService;
 import chauffeur.radio.external.OnlineRadioBox;
 import chauffeur.radio.external.OnlineRadioBox.SongRecord;
@@ -22,6 +24,9 @@ public class RadioController {
 
     @Autowired
     RadioService service;
+
+    @Autowired
+    RadioReviewService reviewService;
 
     public static class RadioPlaylistResponse {
         public String id;
@@ -47,5 +52,12 @@ public class RadioController {
         }
 
         return response;
+    }
+
+    @GetMapping("/radio/reviews/{id}")
+    public RadioPlaylistReviewResponse GetRadioReview(
+            @PathVariable(name = "id") String id,
+            @RequestParam(value = "day_offsets") List<Integer> dayOffsets) throws Exception {
+        return this.reviewService.GetReview(id, dayOffsets);
     }
 }

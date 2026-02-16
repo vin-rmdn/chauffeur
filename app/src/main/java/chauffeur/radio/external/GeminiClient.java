@@ -31,9 +31,9 @@ public class GeminiClient extends LLMClient {
 
     @Autowired
     public GeminiClient(
-            @Value("${gemini.host}") String host,
-            @Value("${gemini.api_key}") String apiKey,
-            @Value("${gemini.model}") String model) {
+            @Value("${gemini.host:https://generativelanguage.googleapis.com}") String host,
+            @Value("${gemini.api_key:DUMMY_GEMINI_API_KEY}") String apiKey,
+            @Value("${gemini.model:gemini-2.0-flash}") String model) {
         this(host, apiKey, model, HttpClient.newHttpClient());
     }
 

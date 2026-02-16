@@ -1,0 +1,14 @@
+{
+    "id": "test-id",
+    "playlists": {
+        "%s": [
+            {
+                "song": {
+                    "title": "Title",
+                    "artist": "Artist"
+                },
+                "played_at": "09:00"
+            }
+        ]
+    }
+}

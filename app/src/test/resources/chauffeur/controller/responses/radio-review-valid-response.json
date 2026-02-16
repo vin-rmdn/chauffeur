@@ -1,0 +1,15 @@
+{
+    "id": "test-id",
+    "playlists": {
+        "2026-02-16": [
+            {
+                "song": {
+                    "title": "Title",
+                    "artist": "Artist"
+                },
+                "played_at": "09:00"
+            }
+        ]
+    },
+    "review": "The playlist has a strong pop focus."
+}

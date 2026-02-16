@@ -10,3 +10,7 @@ spring:
 radio:
   excluded_artists: SWEEPER, foo
   excluded_titles: spot, foo
+gemini:
+  host: https://generativelanguage.googleapis.com
+  model: gemini-2.0-flash
+  api_key: YOUR_GEMINI_API_KEY
