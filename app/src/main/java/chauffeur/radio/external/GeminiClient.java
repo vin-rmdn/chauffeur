@@ -49,10 +49,11 @@ public class GeminiClient extends LLMClient {
         String prompt = buildPrompt(playlists);
         GeminiGenerateContentRequest body = new GeminiGenerateContentRequest(prompt);
 
-        URI uri = URI.create(String.format("%s/v1beta/models/%s:generateContent?key=%s", host, model, apiKey));
+        URI uri = URI.create(String.format("%s/v1beta/models/%s:generateContent", host, model));
 
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .header("Content-Type", "application/json")
+                .header("x-goog-api-key", apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
                 .timeout(Duration.ofSeconds(30))
                 .build();

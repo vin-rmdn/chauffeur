@@ -72,8 +72,9 @@ public class GeminiClientTest {
 
         HttpRequest request = captor.getValue();
         assertEquals(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=test-api-key",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
                 request.uri().toString());
+        assertEquals("test-api-key", request.headers().firstValue("x-goog-api-key").orElse(null));
         assertEquals("The station has a balanced upbeat mix.", review);
     }
 
