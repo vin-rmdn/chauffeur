@@ -31,7 +31,6 @@ dependencies {
     
     mockitoAgent(libs.mockito) { isTransitive = false }
 
-
     // This dependency is used by the application.
     implementation(libs.guava)
     implementation("org.springframework.boot:spring-boot-starter:3.5.10")

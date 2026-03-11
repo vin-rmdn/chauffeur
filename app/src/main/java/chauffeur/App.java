@@ -3,6 +3,8 @@
  */
 package chauffeur;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -10,7 +12,18 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = { "chauffeur" })
 public class App {
+    static final Logger logger = LoggerFactory.getLogger(App.class);
+
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        if (args.length < 1) {
+            logger.error("Required argument. Closing");
+
+            System.exit(1);
+        }
+
+        switch (args[0]) {
+            case "server":
+                SpringApplication.run(App.class, args);
+        }
     }
 }
