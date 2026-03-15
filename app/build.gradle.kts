@@ -39,6 +39,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-test:3.5.10")
     implementation("de.kherud:llama:4.1.0")
 
+    implementation("com.discord4j:discord4j-core:3.3.1")
+
     implementation("org.jsoup:jsoup:1.20.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.19.1")
 }
