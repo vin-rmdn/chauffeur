@@ -1,0 +1,10 @@
+services:
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: chauffeur
+      POSTGRES_PASSWORD: dummy-password
+      POSTGRES_DB: chauffeur
+    ports:
+      - "5432:5432"
