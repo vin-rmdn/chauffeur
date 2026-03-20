@@ -1,0 +1,25 @@
+package chauffeur.discord.subscriber;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class ServiceTest {
+    @Mock
+    Repository mockRepository;
+
+    Service service;
+
+    @BeforeEach
+    void setUp() {
+        service = new Service(mockRepository);
+    }
+
+    @Test
+    void testSubscribe() {
+        service.subscribe(123L);
+    }
+}
