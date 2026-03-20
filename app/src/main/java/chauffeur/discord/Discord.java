@@ -3,16 +3,16 @@ package chauffeur.discord;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import chauffeur.discord.subscriber.Service;
+import chauffeur.discord.subscriber.SubscribeService;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 
 public class Discord {
-    Service service;
+    SubscribeService service;
 
-    public Discord(Service service) {
+    public Discord(SubscribeService service) {
         this.service = service;
     }
 

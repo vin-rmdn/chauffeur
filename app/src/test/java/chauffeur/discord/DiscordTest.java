@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import chauffeur.discord.subscriber.Service;
+import chauffeur.discord.subscriber.SubscribeService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -37,7 +37,7 @@ public class DiscordTest {
     MessageCreateMono mockMessageCreateMono;
 
     @Mock
-    Service mockService;
+    SubscribeService mockService;
 
     Discord classInTest;
 
