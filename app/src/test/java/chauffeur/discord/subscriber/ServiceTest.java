@@ -1,5 +1,7 @@
 package chauffeur.discord.subscriber;
 
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +23,7 @@ public class ServiceTest {
     }
 
     @Test
-    void testSubscribe() {
+    void testSubscribe() throws SQLException {
         service.subscribe(Snowflake.of(123L));
     }
 }
