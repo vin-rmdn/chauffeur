@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import discord4j.common.util.Snowflake;
+
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
     @Mock
@@ -20,6 +22,6 @@ public class ServiceTest {
 
     @Test
     void testSubscribe() {
-        service.subscribe(123L);
+        service.subscribe(Snowflake.of(123L));
     }
 }
