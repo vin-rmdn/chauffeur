@@ -11,15 +11,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import discord4j.common.util.Snowflake;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceTest {
+public class SubscribeServiceTest {
     @Mock
-    Repository mockRepository;
+    SubscribeRepository mockRepository;
 
-    Service service;
+    SubscribeService service;
 
     @BeforeEach
     void setUp() {
-        service = new Service(mockRepository);
+        service = new SubscribeService(mockRepository);
     }
 
     @Test
