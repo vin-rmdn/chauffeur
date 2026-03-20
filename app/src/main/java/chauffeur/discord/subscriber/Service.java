@@ -7,7 +7,7 @@ public class Service {
         this.repository = repository;
     }
 
-    void subscribe(long id) {
+    public void subscribe(long id) {
         repository.save(id);
     }
 }
