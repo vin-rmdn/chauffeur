@@ -1,5 +1,7 @@
 package chauffeur.discord.subscriber;
 
+import discord4j.common.util.Snowflake;
+
 public class Service {
     Repository repository;
 
@@ -7,7 +9,7 @@ public class Service {
         this.repository = repository;
     }
 
-    public void subscribe(long id) {
-        repository.save(id);
+    public void subscribe(Snowflake id) {
+        repository.save(id.asLong());
     }
 }
