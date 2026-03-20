@@ -4,10 +4,10 @@ import java.sql.SQLException;
 
 import discord4j.common.util.Snowflake;
 
-public class Service {
-    Repository repository;
+public class SubscribeService {
+    SubscribeRepository repository;
 
-    public Service (Repository repository) {
+    public SubscribeService(SubscribeRepository repository) {
         this.repository = repository;
     }
 
