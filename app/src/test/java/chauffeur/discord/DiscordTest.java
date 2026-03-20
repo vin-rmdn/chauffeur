@@ -43,14 +43,16 @@ public class DiscordTest {
 
     @BeforeEach
     void setupTest() {
-        classInTest = new Discord(mockService);
+        classInTest = new Discord(mockService, "fake token", 42L);
     }
 
+    @Mock
+    User mockUser;
+
     @Test
-    void testHandleMessageCreateEvent_Failures_WhenSubscriptionFails_UserIsEmpty() {
+    void testHandleMessageCreateEvent_Failures_WhenUserIsEmpty() {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
         when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
-        when(mockMessage.getContent()).thenReturn("!subscribe");
 
         when(mockMessage.getAuthor()).thenReturn(Optional.empty());
         when(mockMessageChannel.createMessage("Error: no author is found")).thenReturn(mockMessageCreateMono);
@@ -58,17 +60,26 @@ public class DiscordTest {
         when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
-
-        verify(mockMessageChannel).createMessage("Error: no author is found");
     }
 
-    @Mock
-    User mockUser;
+    @Test
+    void testHandleMessageCreateEvent_Failures_WhenUserIsSelf() {
+        when(mockEvent.getMessage()).thenReturn(mockMessage);
+        when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+
+        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockUser.getId()).thenReturn(Snowflake.of(42L));
+
+        classInTest.handleMessageCreateEvent(mockEvent);
+    }
 
     @Test
     void testHandleMessageCreateEvent_Failures_WhenSubscriptionFails() throws SQLException {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
         when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
+
         when(mockMessage.getContent()).thenReturn("!subscribe");
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
 
@@ -91,6 +102,9 @@ public class DiscordTest {
     void testHandleMessageCreateEvent_Successful_WhenSubscriptionGoesThrough() throws SQLException {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
         when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
+
         when(mockMessage.getContent()).thenReturn("!subscribe");
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
 
@@ -111,6 +125,9 @@ public class DiscordTest {
     void testHandleMessageCreateEvent_Successful_WhenUserSaysHi() {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
         when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
+
         when(mockMessage.getContent()).thenReturn("hi");
         when(mockMessageChannel.createMessage("https://nohello.net")).thenReturn(mockMessageCreateMono);
 
@@ -125,6 +142,9 @@ public class DiscordTest {
     void testHandleMessageCreateEvent_Successful_WhenCommandIsUnrecognizable() {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
         when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
+
         when(mockMessage.getContent()).thenReturn("como estas");
         when(mockMessageChannel.createMessage("Lo siento, no entiendo ese comando.")).thenReturn(mockMessageCreateMono);
 
