@@ -13,7 +13,6 @@ plugins {
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.4"
     id("java")
-
 }
 
 repositories {
@@ -37,6 +36,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.5.10")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.10")
     implementation("org.springframework.boot:spring-boot-starter-test:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.5.10")
+
     implementation("de.kherud:llama:4.1.0")
 
     implementation("com.discord4j:discord4j-core:3.3.1")
