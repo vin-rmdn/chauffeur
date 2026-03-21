@@ -2,11 +2,25 @@ logging:
   level:
     root: DEBUG
     chauffeur.llm: DEBUG
+  structured:
+    format:
+      console: ecs
 online_radio_box:
   host: https://onlineradiobox.com
 spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chauffeur
+    username: chauffeur 
+    password: fake-password # Change this to your actual password
+    driver-class-name: org.postgresql.Driver
 radio:
   excluded_artists: SWEEPER, foo
   excluded_titles: spot, foo
+gemini:
+  host: https://generativelanguage.googleapis.com
+  model: gemini-2.5-flash-lite
+  api_key: fake-api-key # Change this to your actual API key
+discord:
+  token: fake-token # Change this to your actual Discord token
