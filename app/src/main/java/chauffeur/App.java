@@ -5,13 +5,19 @@ package chauffeur;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
+
+import chauffeur.discord.Discord;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "chauffeur" })
-public class App {
+public class App implements CommandLineRunner {
     static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
@@ -24,6 +30,16 @@ public class App {
         switch (args[0]) {
             case "server":
                 SpringApplication.run(App.class, args);
+            case "worker":
+                new SpringApplicationBuilder(App.class).web(WebApplicationType.NONE).run(args);
         }
+    }
+
+    @Autowired
+    Discord discord;
+
+    @Override
+    public void run(String... args) throws Exception {
+        discord.startWorker();
     }
 }
