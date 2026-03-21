@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 
 import chauffeur.discord.subscriber.SubscribeService;
@@ -21,8 +23,8 @@ import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.discordjson.json.MessageReferenceData;
 
-@Component
-public class Discord {
+@SpringBootApplication
+public class Discord implements CommandLineRunner {
     SubscribeService service;
     String token;
     long ownId;
@@ -134,5 +136,10 @@ public class Discord {
         });
 
         gateway.onDisconnect().block();
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        startWorker();
     }
 }

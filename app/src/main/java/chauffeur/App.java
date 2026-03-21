@@ -5,8 +5,6 @@ package chauffeur;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -17,31 +15,24 @@ import chauffeur.discord.Discord;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "chauffeur.controller" })
-public class App implements CommandLineRunner {
+public class App {
     static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            logger.error("Required argument. Closing");
+        String profile = System.getProperty(
+                "spring.profiles.active",
+                System.getenv().getOrDefault("SPRING_PROFILES_ACTIVE", "server"));
+        logger.info("Active profile: {}", profile);
 
-            System.exit(1);
-        }
-
-        switch (args[0]) {
+        switch (profile) {
             case "server":
                 new SpringApplicationBuilder(Controller.class).profiles("server").run(args);
                 break;
             case "worker":
-                new SpringApplicationBuilder(App.class).web(WebApplicationType.NONE).profiles("worker").run(args);
+                new SpringApplicationBuilder(Discord.class).web(WebApplicationType.NONE).profiles("worker").run(args);
                 break;
+            default:
+                logger.error("Unknown profile: {}", profile);
         }
-    }
-
-    @Autowired
-    Discord discord;
-
-    @Override
-    public void run(String... args) throws Exception {
-        discord.startWorker();
     }
 }

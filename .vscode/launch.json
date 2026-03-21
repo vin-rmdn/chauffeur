@@ -3,10 +3,23 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Spring: Boot run",
+            "name": "Server",
             "request": "launch",
             "mainClass": "chauffeur.App",
             "console": "internalConsole",
+            "args": [
+                "-Dspring.profiles.active=server"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Worker",
+            "request": "launch",
+            "mainClass": "chauffeur.App",
+            "console": "internalConsole",
+            "args": [
+                "-Dspring.profiles.active=worker"
+            ]
         }
     ]
 }
