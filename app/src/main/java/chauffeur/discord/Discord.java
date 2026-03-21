@@ -3,6 +3,8 @@ package chauffeur.discord;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import chauffeur.discord.subscriber.SubscribeService;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -20,6 +23,8 @@ public class Discord {
     SubscribeService service;
     String token;
     long ownId;
+
+    final Logger logger = LoggerFactory.getLogger(Discord.class);
 
     @Autowired
     public Discord(SubscribeService service,
@@ -72,6 +77,15 @@ public class Discord {
                 channel.createMessage("Lo siento, no entiendo ese comando.").block();
                 break;
         }
+    }
+
+    public void inform(ReadyEvent event) {
+        User workerUser = event.getSelf();
+
+        logger.atInfo().addKeyValue("gateway_version", event.getGatewayVersion())
+                .addKeyValue("username", workerUser.getUsername())
+                .addKeyValue("id", workerUser.getId()).addKeyValue("session_id", event.getSessionId())
+                .log("Worker is ready to receive Discord events");
     }
 
     public void startWorker() {
