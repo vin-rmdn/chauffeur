@@ -2,7 +2,6 @@ package chauffeur.radio;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ public class RadioService {
     List<String> excludedArtists;
     List<String> excludedTitles;
 
-    @Autowired
     public RadioService(
             OnlineRadioBox radioClient,
             @Value("${radio.excluded_artists}") List<String> excludedArtists,

@@ -2,7 +2,6 @@ package chauffeur.discord.subscriber;
 
 import java.sql.SQLException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import discord4j.common.util.Snowflake;
@@ -11,7 +10,6 @@ import discord4j.common.util.Snowflake;
 public class SubscribeService {
     SubscribeRepository repository;
 
-    @Autowired
     public SubscribeService(SubscribeRepository repository) {
         this.repository = repository;
     }

@@ -2,7 +2,6 @@ package chauffeur.discord.subscriber;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,7 +12,6 @@ public class SubscribeRepository {
 
     JdbcTemplate template;
 
-    @Autowired
     public SubscribeRepository(JdbcTemplate template) {
         this.template = template;
     }
