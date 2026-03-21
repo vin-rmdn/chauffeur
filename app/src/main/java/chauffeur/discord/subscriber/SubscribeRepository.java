@@ -8,25 +8,25 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class SubscribeRepository {
-    final Logger logger = LoggerFactory.getLogger(SubscribeRepository.class);
+  final Logger logger = LoggerFactory.getLogger(SubscribeRepository.class);
 
-    JdbcTemplate template;
+  JdbcTemplate template;
 
-    public SubscribeRepository(JdbcTemplate template) {
-        this.template = template;
+  public SubscribeRepository(JdbcTemplate template) {
+    this.template = template;
+  }
+
+  public void save(long id) throws DataAccessException {
+    final String query = "INSERT INTO subscribers (user_id) VALUES (?);";
+
+    try {
+      int updatedRows = template.update(query, id);
+
+      logger.atDebug().addKeyValue("updated_rows", updatedRows).log("SQL statement is executed");
+    } catch (DataAccessException e) {
+      logger.error("Failed to save subscriber", e);
+
+      throw e;
     }
-
-    public void save(long id) throws DataAccessException {
-        final String query = "INSERT INTO subscribers (user_id) VALUES (?);";
-
-        try {
-            int updatedRows = template.update(query, id);
-
-            logger.atDebug().addKeyValue("updated_rows", updatedRows).log("SQL statement is executed");
-        } catch (DataAccessException e) {
-            logger.error("Failed to save subscriber", e);
-
-            throw e;
-        }
-    }
+  }
 }

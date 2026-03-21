@@ -13,29 +13,28 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscribeRepositoryTest {
-    @Mock
-    JdbcTemplate mockTemplate;
+  @Mock
+  JdbcTemplate mockTemplate;
 
-    SubscribeRepository repository;
+  SubscribeRepository repository;
 
-    @BeforeEach
-    void setupTest() {
-        repository = new SubscribeRepository(mockTemplate);
-    }
+  @BeforeEach
+  void setupTest() {
+    repository = new SubscribeRepository(mockTemplate);
+  }
 
-    @Test
-    void testSave_Failure_SQLException() {
-        when(mockTemplate.update("INSERT INTO subscribers (user_id) VALUES (?);", 123L))
-                .thenThrow(new DataAccessException("unit test-provided exception") {
-                });
+  @Test
+  void testSave_Failure_SqlException() {
+    when(mockTemplate.update("INSERT INTO subscribers (user_id) VALUES (?);", 123L))
+        .thenThrow(new DataAccessException("unit test-provided exception") {});
 
-        assertThrows(DataAccessException.class, () -> repository.save(123L));
-    }
+    assertThrows(DataAccessException.class, () -> repository.save(123L));
+  }
 
-    @Test
-    void testSave_Successful() {
-        when(mockTemplate.update("INSERT INTO subscribers (user_id) VALUES (?);", 123L)).thenReturn(1);
+  @Test
+  void testSave_Successful() {
+    when(mockTemplate.update("INSERT INTO subscribers (user_id) VALUES (?);", 123L)).thenReturn(1);
 
-        repository.save(123L);
-    }
+    repository.save(123L);
+  }
 }
