@@ -45,6 +45,8 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.20.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.19.1")
+
+    implementation("org.postgresql:postgresql:42.7.10")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
