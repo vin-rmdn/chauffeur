@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
+import chauffeur.controller.Controller;
 import chauffeur.discord.Discord;
 
 @SpringBootApplication
@@ -29,10 +29,10 @@ public class App implements CommandLineRunner {
 
         switch (args[0]) {
             case "server":
-                SpringApplication.run(App.class, args);
+                new SpringApplicationBuilder(Controller.class).profiles("server").run(args);
                 break;
             case "worker":
-                new SpringApplicationBuilder(App.class).web(WebApplicationType.NONE).run(args);
+                new SpringApplicationBuilder(App.class).web(WebApplicationType.NONE).profiles("worker").run(args);
                 break;
         }
     }
