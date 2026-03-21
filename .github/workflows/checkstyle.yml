@@ -8,6 +8,6 @@ jobs:
       - uses: dbelyaev/action-checkstyle@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          filter_mode: nofilter
           level: warning
           checkstyle_config: google_checks.xml
