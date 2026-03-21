@@ -30,8 +30,10 @@ public class App implements CommandLineRunner {
         switch (args[0]) {
             case "server":
                 SpringApplication.run(App.class, args);
+                break;
             case "worker":
                 new SpringApplicationBuilder(App.class).web(WebApplicationType.NONE).run(args);
+                break;
         }
     }
 
