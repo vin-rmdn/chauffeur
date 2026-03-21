@@ -1,7 +1,7 @@
 {
     "id": "test-id",
     "playlists": {
-        "2026-02-07": [
+        "%s": [
             {
                 "song": {
                     "title": "Title",

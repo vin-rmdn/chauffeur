@@ -12,14 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import chauffeur.radio.RadioService;
-import chauffeur.radio.external.OnlineRadioBox;
 import chauffeur.radio.external.OnlineRadioBox.SongRecord;
 
 @RestController
 public class RadioController {
-    @Autowired
-    OnlineRadioBox onlineRadioBox;
-
     @Autowired
     RadioService service;
 
@@ -35,7 +31,7 @@ public class RadioController {
 
     @GetMapping("/radio/playlists/{id}")
     public RadioPlaylistResponse GetRadioPlaylist(
-            @PathVariable(name = "id") String id,
+            @PathVariable String id,
             @RequestParam(value = "day_offsets") List<Integer> dayOffsets) throws Exception {
         RadioPlaylistResponse response = new RadioPlaylistResponse(id);
 

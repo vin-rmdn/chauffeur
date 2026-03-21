@@ -16,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 import chauffeur.discord.Discord;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "chauffeur" })
+@ComponentScan(basePackages = { "chauffeur.controller" })
 public class App implements CommandLineRunner {
     static final Logger logger = LoggerFactory.getLogger(App.class);
 

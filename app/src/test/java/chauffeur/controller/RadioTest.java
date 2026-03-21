@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import chauffeur.discord.Discord;
 import chauffeur.radio.RadioService;
 import chauffeur.radio.external.OnlineRadioBox.Song;
 import chauffeur.radio.external.OnlineRadioBox.SongRecord;
@@ -28,20 +30,21 @@ public class RadioTest {
     @MockitoBean
     RadioService radioService;
 
+    @MockitoBean
+    Discord discord; // noop
+
     @Test
     void getRadioPlaylist_Successful() throws Exception {
         List<SongRecord> mockSongRecords = List.of(new SongRecord(new Song("Artist", "Title"), "09:00"));
         when(radioService.GetPlaylists("test-id", 0)).thenReturn(mockSongRecords);
 
-        String expectedContent = new String(
+        String expectedContentTemplate = new String(
                 Files.readAllBytes(
                         Paths.get(
                                 "src/test/resources/chauffeur/controller/responses/radio-playlist-valid-response.json")));
-        assertNotNull(expectedContent);
+        assertNotNull(expectedContentTemplate);
 
-        mockMvc.perform(get("/radio/playlists/test-id")
-                .param("day_offsets", "0"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedContent));
+        mockMvc.perform(get("/radio/playlists/test-id").param("day_offsets", "0")).andExpect(status().isOk())
+                .andExpect(content().json(expectedContentTemplate.formatted(LocalDate.now().minusDays(0))));
     }
 }
