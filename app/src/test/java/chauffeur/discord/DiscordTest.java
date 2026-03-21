@@ -20,7 +20,9 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.spec.MessageCreateMono;
+import discord4j.core.spec.StartThreadFromMessageMono;
 import discord4j.discordjson.json.MessageReferenceData;
 import reactor.core.publisher.Mono;
 
@@ -75,99 +77,102 @@ public class DiscordTest {
         classInTest.handleMessageCreateEvent(mockEvent);
     }
 
+    @Mock
+    StartThreadFromMessageMono mockThread;
+
+    @Mock
+    ThreadChannel mockThreadChannel;
+
+    final long userId = 123L;
+    final long threadId = 456L;
+    final long messageId = 124L;
+
     @Test
     void testHandleMessageCreateEvent_Failures_WhenSubscriptionFails() throws SQLException {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
-        when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getChannel()).thenReturn(Mono.just(mockThreadChannel));
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
-
+        when(mockUser.getId()).thenReturn(Snowflake.of(userId));
         when(mockMessage.getContent()).thenReturn("!subscribe");
-        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+        when(mockUser.getUsername()).thenReturn("testuser");
+        when(mockThreadChannel.getId()).thenReturn(Snowflake.of(threadId));
 
-        Snowflake mockUserId = Snowflake.of(123L);
-        when(mockUser.getId()).thenReturn(mockUserId);
-
-        doThrow(new SQLException("unit test-provided exception")).when(mockService).subscribe(mockUserId);
-        when(mockMessageChannel.createMessage("Failed to subscribe: unit test-provided exception"))
+        when(mockThreadChannel.createMessage("Failed to subscribe: unit test-provided exception"))
                 .thenReturn(mockMessageCreateMono);
-
+        when(mockMessage.getId()).thenReturn(Snowflake.of(messageId));
         when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
                 .thenReturn(mockMessageCreateMono);
-        when(mockMessageCreateMono.block()).thenReturn(null);
+
+        Snowflake mockUserId = Snowflake.of(userId);
+        doThrow(new SQLException("unit test-provided exception")).when(mockService).subscribe(mockUserId);
 
         classInTest.handleMessageCreateEvent(mockEvent);
 
-        verify(mockMessageChannel).createMessage("Failed to subscribe: unit test-provided exception");
+        verify(mockThreadChannel).createMessage("Failed to subscribe: unit test-provided exception");
         verify(mockService).subscribe(mockUserId);
     }
 
     @Test
     void testHandleMessageCreateEvent_Successful_WhenSubscriptionGoesThrough() throws SQLException {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
-        when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getChannel()).thenReturn(Mono.just(mockThreadChannel));
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
-
+        when(mockUser.getId()).thenReturn(Snowflake.of(userId));
         when(mockMessage.getContent()).thenReturn("!subscribe");
-        when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+        when(mockUser.getUsername()).thenReturn("testuser");
+        when(mockThreadChannel.getId()).thenReturn(Snowflake.of(threadId));
 
-        Snowflake mockUserId = Snowflake.of(123L);
-        when(mockUser.getId()).thenReturn(mockUserId);
-
-        when(mockMessageChannel.createMessage("Subscribed!")).thenReturn(mockMessageCreateMono);
-
+        when(mockThreadChannel.createMessage("Subscribed!"))
+                .thenReturn(mockMessageCreateMono);
+        when(mockMessage.getId()).thenReturn(Snowflake.of(messageId));
         when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
                 .thenReturn(mockMessageCreateMono);
-        when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
 
-        verify(mockMessageChannel).createMessage("Subscribed!");
-        verify(mockService).subscribe(mockUserId);
+        verify(mockThreadChannel).createMessage("Subscribed!");
+        verify(mockService).subscribe(Snowflake.of(123L));
     }
 
     @Test
     void testHandleMessageCreateEvent_Successful_WhenUserSaysHi() {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
-        when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getChannel()).thenReturn(Mono.just(mockThreadChannel));
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
-
+        when(mockUser.getId()).thenReturn(Snowflake.of(userId));
         when(mockMessage.getContent()).thenReturn("hi");
-        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+        when(mockUser.getUsername()).thenReturn("testuser");
+        when(mockThreadChannel.getId()).thenReturn(Snowflake.of(threadId));
 
-        when(mockMessageChannel.createMessage("https://nohello.net")).thenReturn(mockMessageCreateMono);
-
+        when(mockThreadChannel.createMessage("https://nohello.net"))
+                .thenReturn(mockMessageCreateMono);
+        when(mockMessage.getId()).thenReturn(Snowflake.of(messageId));
         when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
                 .thenReturn(mockMessageCreateMono);
-        when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
 
-        verify(mockMessageChannel).createMessage("https://nohello.net");
+        verify(mockThreadChannel).createMessage("https://nohello.net");
     }
 
     @Test
     void testHandleMessageCreateEvent_Successful_WhenCommandIsUnrecognizable() {
         when(mockEvent.getMessage()).thenReturn(mockMessage);
-        when(mockMessage.getChannel()).thenReturn(Mono.just(mockMessageChannel));
+        when(mockMessage.getChannel()).thenReturn(Mono.just(mockThreadChannel));
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
-        when(mockUser.getId()).thenReturn(Snowflake.of(123L));
-
+        when(mockUser.getId()).thenReturn(Snowflake.of(userId));
         when(mockMessage.getContent()).thenReturn("como estas");
-        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+        when(mockUser.getUsername()).thenReturn("testuser");
+        when(mockThreadChannel.getId()).thenReturn(Snowflake.of(threadId));
 
-        when(mockMessageChannel.createMessage("Lo siento, no entiendo ese comando.")).thenReturn(mockMessageCreateMono);
-
+        when(mockThreadChannel.createMessage("Lo siento, no entiendo ese comando."))
+                .thenReturn(mockMessageCreateMono);
+        when(mockMessage.getId()).thenReturn(Snowflake.of(messageId));
         when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
                 .thenReturn(mockMessageCreateMono);
-        when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
 
-        verify(mockMessageChannel).createMessage("Lo siento, no entiendo ese comando.");
+        verify(mockThreadChannel).createMessage("Lo siento, no entiendo ese comando.");
     }
 }

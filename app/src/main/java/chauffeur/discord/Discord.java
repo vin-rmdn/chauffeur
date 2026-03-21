@@ -17,6 +17,8 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.ThreadChannel;
+import discord4j.core.spec.MessageCreateMono;
 import discord4j.discordjson.json.MessageReferenceData;
 
 @Component
@@ -56,29 +58,40 @@ public class Discord {
         }
 
         String content = message.getContent();
-        MessageReferenceData reference = MessageReferenceData.builder().messageId(message.getId().asLong()).build();
+        logger.atInfo().addKeyValue("content", content).addKeyValue("user", user.get().getUsername())
+                .log("receiving message");
+
+        ThreadChannel thread;
+        if (channel instanceof ThreadChannel)
+            thread = (ThreadChannel) channel;
+        else
+            thread = message.createPublicThread(String.format("%s (%s)", content,
+                    message.getTimestamp().toString()))
+                    .block();
+        logger.atInfo().addKeyValue("thread_id", thread.getId().asLong()).log("Thread created");
 
         switch (content) {
             case "hi":
-                channel.createMessage("https://nohello.net").withMessageReference(reference).block();
+                reply(message, thread, "https://nohello.net");
+
                 break;
             case "!subscribe":
                 try {
                     service.subscribe(user.get().getId());
                 } catch (SQLException e) {
-                    channel.createMessage("Failed to subscribe: " + e.getMessage())
-                            .withMessageReference(reference).block();
+                    reply(message, thread, "Failed to subscribe: %s".formatted(e.getMessage()));
 
                     return;
                 }
 
-                channel.createMessage("Subscribed!").withMessageReference(reference).block();
+                reply(message, thread, "Subscribed!");
                 break;
 
             // Add more commands here
 
             default:
-                channel.createMessage("Lo siento, no entiendo ese comando.").withMessageReference(reference).block();
+                reply(message, thread, "Lo siento, no entiendo ese comando.");
+
                 break;
         }
     }
@@ -90,6 +103,20 @@ public class Discord {
                 .addKeyValue("username", workerUser.getUsername())
                 .addKeyValue("id", workerUser.getId()).addKeyValue("session_id", event.getSessionId())
                 .log("Worker is ready to receive Discord events");
+    }
+
+    void reply(Message original, ThreadChannel thread, String content) {
+        boolean insideThread = (original.getChannel().block() instanceof ThreadChannel);
+
+        MessageCreateMono msg = thread.createMessage(content);
+        if (insideThread) {
+            MessageReferenceData reference = MessageReferenceData.builder().messageId(original.getId().asLong())
+                    .build();
+
+            msg = msg.withMessageReference(reference);
+        }
+
+        msg.block();
     }
 
     public void startWorker() {
