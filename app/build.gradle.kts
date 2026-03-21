@@ -10,7 +10,7 @@ plugins {
     application
 
     // Spring Boot plugin
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "3.5.12"
     id("io.spring.dependency-management") version "1.1.4"
 
     java
@@ -39,12 +39,12 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
-    implementation("org.springframework.boot:spring-boot-starter:3.5.10")
-    implementation("org.springframework.boot:spring-boot-starter-web:3.5.10")
-    implementation("org.springframework.boot:spring-boot-starter-validation:3.5.10")
-    implementation("org.springframework.boot:spring-boot-starter-test:3.5.10")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc:3.5.10")
-    implementation("org.springframework.boot:spring-boot-starter-actuator:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter:3.5.12")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.5.12")
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.5.12")
+    implementation("org.springframework.boot:spring-boot-starter-test:3.5.12")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:3.5.12")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.5.12")
 
     implementation("de.kherud:llama:4.1.0")
 
