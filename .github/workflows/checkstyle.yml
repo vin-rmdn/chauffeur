@@ -11,3 +11,4 @@ jobs:
           filter_mode: nofilter
           level: warning
           checkstyle_config: app/config/checkstyle/checkstyle.xml
+          properties: "-Dconfig_loc=app/config/checkstyle"
