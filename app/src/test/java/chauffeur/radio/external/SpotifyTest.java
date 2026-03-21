@@ -13,18 +13,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import chauffeur.radio.external.Spotify.LoginException;
 
+@ExtendWith(MockitoExtension.class)
 public class SpotifyTest {
     HttpClient mockHttpClient = mock(HttpClient.class);
     Spotify classInTest = new Spotify("http://accountHost", "http://apiHost", "clientID", "clientSecret",
             mockHttpClient);
 
+    @Mock
+    HttpResponse<String> mockHttpResponse;
+
     @Test
     void TestSpotify_Login_InvalidResponse() throws Exception {
-        HttpResponse<String> mockHttpResponse = mock(HttpResponse.class);
-        
         when(mockHttpClient.<String>send(any(), any())).thenReturn(mockHttpResponse);
 
         InputStream responseStream = getClass().getClassLoader()
@@ -40,8 +45,6 @@ public class SpotifyTest {
 
     @Test
     void TestSpotify_Login_Successful() throws Exception {
-        HttpResponse<String> mockHttpResponse = mock(HttpResponse.class);
-        
         when(mockHttpClient.<String>send(any(), any())).thenReturn(mockHttpResponse);
 
         InputStream responseStream = getClass().getClassLoader()
