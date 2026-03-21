@@ -10,4 +10,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           filter_mode: nofilter
           level: warning
-          checkstyle_config: google_checks.xml
+          checkstyle_config: app/config/checkstyle/checkstyle.xml
