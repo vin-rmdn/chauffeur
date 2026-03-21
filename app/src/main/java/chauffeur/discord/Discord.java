@@ -3,6 +3,8 @@ package chauffeur.discord;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import chauffeur.discord.subscriber.SubscribeService;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -20,6 +23,8 @@ public class Discord {
     SubscribeService service;
     String token;
     long ownId;
+
+    final Logger logger = LoggerFactory.getLogger(Discord.class);
 
     @Autowired
     public Discord(SubscribeService service,
@@ -74,11 +79,24 @@ public class Discord {
         }
     }
 
+    public void inform(ReadyEvent event) {
+        User workerUser = event.getSelf();
+
+        logger.atInfo().addKeyValue("gateway_version", event.getGatewayVersion())
+                .addKeyValue("username", workerUser.getUsername())
+                .addKeyValue("id", workerUser.getId()).addKeyValue("session_id", event.getSessionId())
+                .log("Worker is ready to receive Discord events");
+    }
+
     public void startWorker() {
         DiscordClient client = DiscordClient.create(token);
         GatewayDiscordClient gateway = client.login().block();
 
         ownId = client.getSelf().block().id().asLong();
+
+        gateway.on(ReadyEvent.class).subscribe(event -> {
+            inform(event);
+        });
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             handleMessageCreateEvent(event);
