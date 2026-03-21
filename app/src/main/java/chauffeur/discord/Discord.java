@@ -94,6 +94,10 @@ public class Discord {
 
         ownId = client.getSelf().block().id().asLong();
 
+        gateway.on(ReadyEvent.class).subscribe(event -> {
+            inform(event);
+        });
+
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             handleMessageCreateEvent(event);
         });
