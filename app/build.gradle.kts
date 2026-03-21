@@ -12,7 +12,14 @@ plugins {
     // Spring Boot plugin
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.4"
-    id("java")
+
+    java
+    checkstyle
+}
+
+checkstyle {
+    toolVersion = "13.3.0"
+    config = resources.text.fromArchiveEntry(configurations.checkstyle.get().filter {it.name.startsWith("checkstyle")}, "google_checks.xml")
 }
 
 repositories {
