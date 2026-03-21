@@ -17,6 +17,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.discordjson.json.MessageReferenceData;
 
 @Component
 public class Discord {
@@ -55,26 +56,29 @@ public class Discord {
         }
 
         String content = message.getContent();
+        MessageReferenceData reference = MessageReferenceData.builder().messageId(message.getId().asLong()).build();
+
         switch (content) {
             case "hi":
-                channel.createMessage("https://nohello.net").block();
+                channel.createMessage("https://nohello.net").withMessageReference(reference).block();
                 break;
             case "!subscribe":
                 try {
                     service.subscribe(user.get().getId());
                 } catch (SQLException e) {
-                    channel.createMessage("Failed to subscribe: " + e.getMessage()).block();
+                    channel.createMessage("Failed to subscribe: " + e.getMessage())
+                            .withMessageReference(reference).block();
 
                     return;
                 }
 
-                channel.createMessage("Subscribed!").block();
+                channel.createMessage("Subscribed!").withMessageReference(reference).block();
                 break;
 
             // Add more commands here
 
             default:
-                channel.createMessage("Lo siento, no entiendo ese comando.").block();
+                channel.createMessage("Lo siento, no entiendo ese comando.").withMessageReference(reference).block();
                 break;
         }
     }

@@ -1,5 +1,6 @@
 package chauffeur.discord;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateMono;
+import discord4j.discordjson.json.MessageReferenceData;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,6 +84,7 @@ public class DiscordTest {
 
         when(mockMessage.getContent()).thenReturn("!subscribe");
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
 
         Snowflake mockUserId = Snowflake.of(123L);
         when(mockUser.getId()).thenReturn(mockUserId);
@@ -90,6 +93,8 @@ public class DiscordTest {
         when(mockMessageChannel.createMessage("Failed to subscribe: unit test-provided exception"))
                 .thenReturn(mockMessageCreateMono);
 
+        when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
+                .thenReturn(mockMessageCreateMono);
         when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
@@ -107,12 +112,15 @@ public class DiscordTest {
 
         when(mockMessage.getContent()).thenReturn("!subscribe");
         when(mockMessage.getAuthor()).thenReturn(Optional.of(mockUser));
+        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
 
         Snowflake mockUserId = Snowflake.of(123L);
         when(mockUser.getId()).thenReturn(mockUserId);
 
         when(mockMessageChannel.createMessage("Subscribed!")).thenReturn(mockMessageCreateMono);
 
+        when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
+                .thenReturn(mockMessageCreateMono);
         when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
@@ -129,8 +137,12 @@ public class DiscordTest {
         when(mockUser.getId()).thenReturn(Snowflake.of(123L));
 
         when(mockMessage.getContent()).thenReturn("hi");
+        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+
         when(mockMessageChannel.createMessage("https://nohello.net")).thenReturn(mockMessageCreateMono);
 
+        when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
+                .thenReturn(mockMessageCreateMono);
         when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
@@ -146,8 +158,12 @@ public class DiscordTest {
         when(mockUser.getId()).thenReturn(Snowflake.of(123L));
 
         when(mockMessage.getContent()).thenReturn("como estas");
+        when(mockMessage.getId()).thenReturn(Snowflake.of(124L));
+
         when(mockMessageChannel.createMessage("Lo siento, no entiendo ese comando.")).thenReturn(mockMessageCreateMono);
 
+        when(mockMessageCreateMono.withMessageReference(any(MessageReferenceData.class)))
+                .thenReturn(mockMessageCreateMono);
         when(mockMessageCreateMono.block()).thenReturn(null);
 
         classInTest.handleMessageCreateEvent(mockEvent);
