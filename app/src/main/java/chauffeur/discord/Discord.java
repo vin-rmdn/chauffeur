@@ -1,15 +1,5 @@
 package chauffeur.discord;
 
-import java.sql.SQLException;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import chauffeur.discord.subscriber.SubscribeService;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -21,124 +11,131 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.discordjson.json.MessageReferenceData;
+import java.sql.SQLException;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Discord implements CommandLineRunner {
-    SubscribeService service;
-    String token;
-    long ownId;
+  SubscribeService service;
+  String token;
+  long ownId;
 
-    final Logger logger = LoggerFactory.getLogger(Discord.class);
+  final Logger logger = LoggerFactory.getLogger(Discord.class);
 
-    @Autowired
-    public Discord(SubscribeService service,
-            @Value("${discord.token}") String token) {
-        this.service = service;
-        this.token = token;
+  @Autowired
+  public Discord(SubscribeService service, @Value("${discord.token}") String token) {
+    this.service = service;
+    this.token = token;
+  }
+
+  public Discord(SubscribeService service, String token, long ownId) {
+    this.service = service;
+    this.token = token;
+    this.ownId = ownId;
+  }
+
+  public void handleMessageCreateEvent(MessageCreateEvent event) {
+    Message message = event.getMessage();
+    MessageChannel channel = message.getChannel().block();
+
+    Optional<User> user = message.getAuthor();
+    if (user.isEmpty()) {
+      channel.createMessage("Error: no author is found").block();
+
+      return;
     }
 
-    public Discord(SubscribeService service, String token, long ownId) {
-        this.service = service;
-        this.token = token;
-        this.ownId = ownId;
+    if (user.get().getId().asLong() == ownId) {
+      return;
     }
 
-    public void handleMessageCreateEvent(MessageCreateEvent event) {
-        Message message = event.getMessage();
-        MessageChannel channel = message.getChannel().block();
+    String content = message.getContent();
+    logger.atInfo().addKeyValue("content", content).addKeyValue("user", user.get().getUsername())
+        .log("receiving message");
 
-        Optional<User> user = message.getAuthor();
-        if (user.isEmpty()) {
-            channel.createMessage("Error: no author is found").block();
+    ThreadChannel thread;
+    if (channel instanceof ThreadChannel)
+      thread = (ThreadChannel) channel;
+    else
+      thread = message
+          .createPublicThread(String.format("%s (%s)", content, message.getTimestamp().toString()))
+          .block();
+    logger.atInfo().addKeyValue("thread_id", thread.getId().asLong()).log("Thread created");
 
-            return;
+    switch (content) {
+      case "hi":
+        reply(message, thread, "https://nohello.net");
+
+        break;
+      case "!subscribe":
+        try {
+          service.subscribe(user.get().getId());
+        } catch (SQLException e) {
+          reply(message, thread, "Failed to subscribe: %s".formatted(e.getMessage()));
+
+          return;
         }
 
-        if (user.get().getId().asLong() == ownId) {
-            return;
-        }
+        reply(message, thread, "Subscribed!");
+        break;
 
-        String content = message.getContent();
-        logger.atInfo().addKeyValue("content", content).addKeyValue("user", user.get().getUsername())
-                .log("receiving message");
+      // Add more commands here
 
-        ThreadChannel thread;
-        if (channel instanceof ThreadChannel)
-            thread = (ThreadChannel) channel;
-        else
-            thread = message.createPublicThread(String.format("%s (%s)", content,
-                    message.getTimestamp().toString()))
-                    .block();
-        logger.atInfo().addKeyValue("thread_id", thread.getId().asLong()).log("Thread created");
+      default:
+        reply(message, thread, "Lo siento, no entiendo ese comando.");
 
-        switch (content) {
-            case "hi":
-                reply(message, thread, "https://nohello.net");
+        break;
+    }
+  }
 
-                break;
-            case "!subscribe":
-                try {
-                    service.subscribe(user.get().getId());
-                } catch (SQLException e) {
-                    reply(message, thread, "Failed to subscribe: %s".formatted(e.getMessage()));
+  public void inform(ReadyEvent event) {
+    User workerUser = event.getSelf();
 
-                    return;
-                }
+    logger.atInfo().addKeyValue("gateway_version", event.getGatewayVersion())
+        .addKeyValue("username", workerUser.getUsername()).addKeyValue("id", workerUser.getId())
+        .addKeyValue("session_id", event.getSessionId())
+        .log("Worker is ready to receive Discord events");
+  }
 
-                reply(message, thread, "Subscribed!");
-                break;
+  void reply(Message original, ThreadChannel thread, String content) {
+    boolean insideThread = (original.getChannel().block() instanceof ThreadChannel);
 
-            // Add more commands here
+    MessageCreateMono msg = thread.createMessage(content);
+    if (insideThread) {
+      MessageReferenceData reference =
+          MessageReferenceData.builder().messageId(original.getId().asLong()).build();
 
-            default:
-                reply(message, thread, "Lo siento, no entiendo ese comando.");
-
-                break;
-        }
+      msg = msg.withMessageReference(reference);
     }
 
-    public void inform(ReadyEvent event) {
-        User workerUser = event.getSelf();
+    msg.block();
+  }
 
-        logger.atInfo().addKeyValue("gateway_version", event.getGatewayVersion())
-                .addKeyValue("username", workerUser.getUsername())
-                .addKeyValue("id", workerUser.getId()).addKeyValue("session_id", event.getSessionId())
-                .log("Worker is ready to receive Discord events");
-    }
+  public void startWorker() {
+    DiscordClient client = DiscordClient.create(token);
+    GatewayDiscordClient gateway = client.login().block();
 
-    void reply(Message original, ThreadChannel thread, String content) {
-        boolean insideThread = (original.getChannel().block() instanceof ThreadChannel);
+    ownId = client.getSelf().block().id().asLong();
 
-        MessageCreateMono msg = thread.createMessage(content);
-        if (insideThread) {
-            MessageReferenceData reference = MessageReferenceData.builder().messageId(original.getId().asLong())
-                    .build();
+    gateway.on(ReadyEvent.class).subscribe(event -> {
+      inform(event);
+    });
 
-            msg = msg.withMessageReference(reference);
-        }
+    gateway.on(MessageCreateEvent.class).subscribe(event -> {
+      handleMessageCreateEvent(event);
+    });
 
-        msg.block();
-    }
+    gateway.onDisconnect().block();
+  }
 
-    public void startWorker() {
-        DiscordClient client = DiscordClient.create(token);
-        GatewayDiscordClient gateway = client.login().block();
-
-        ownId = client.getSelf().block().id().asLong();
-
-        gateway.on(ReadyEvent.class).subscribe(event -> {
-            inform(event);
-        });
-
-        gateway.on(MessageCreateEvent.class).subscribe(event -> {
-            handleMessageCreateEvent(event);
-        });
-
-        gateway.onDisconnect().block();
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        startWorker();
-    }
+  @Override
+  public void run(String... args) throws Exception {
+    startWorker();
+  }
 }

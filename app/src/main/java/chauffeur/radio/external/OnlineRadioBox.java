@@ -1,5 +1,8 @@
 package chauffeur.radio.external;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,7 +13,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -22,135 +24,131 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpServerErrorException;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-
 @Repository
 public class OnlineRadioBox {
-    private String host;
-    private HttpClient httpClient;
+  private String host;
+  private HttpClient httpClient;
 
-    private static final Logger logger = LoggerFactory.getLogger(OnlineRadioBox.class);
-    private ObjectMapper mapper;
+  private static final Logger logger = LoggerFactory.getLogger(OnlineRadioBox.class);
+  private ObjectMapper mapper;
 
-    public static class InvalidFormatException extends Exception {
-        public InvalidFormatException(String message) {
-            super(message);
-        }
+  public static class InvalidFormatException extends Exception {
+    public InvalidFormatException(String message) {
+      super(message);
+    }
+  }
+
+  public static class SongRecord {
+    public Song song;
+    public String playedAt; // TODO: change to datetime
+
+    public SongRecord(Song song, String playedAt) {
+      this.song = song;
+      this.playedAt = playedAt;
     }
 
-    public static class SongRecord {
-        public Song song;
-        public String playedAt; // TODO: change to datetime
+    public String toString() {
+      return String.format("%s - %s (played at %s)", song.artist, song.title, playedAt);
+    }
+  }
 
-        public SongRecord(Song song, String playedAt) {
-            this.song = song;
-            this.playedAt = playedAt;
-        }
+  public static class Song {
+    public String title;
+    public String artist;
 
-        public String toString() {
-            return String.format("%s - %s (played at %s)", song.artist, song.title, playedAt);
-        }
+    public Song(String artist, String title) {
+      this.artist = artist;
+      this.title = title;
     }
 
-    public static class Song {
-        public String title;
-        public String artist;
+    public Song(String artistTitleEntry) throws InvalidFormatException {
+      String[] entries = artistTitleEntry.split(" - ");
+      if (entries.length != 2) {
+        throw new InvalidFormatException(artistTitleEntry);
+      }
 
-        public Song(String artist, String title) {
-            this.artist = artist;
-            this.title = title;
-        }
-
-        public Song(String artistTitleEntry) throws InvalidFormatException {
-            String[] entries = artistTitleEntry.split(" - ");
-            if (entries.length != 2) {
-                throw new InvalidFormatException(artistTitleEntry);
-            }
-
-            this.artist = entries[0];
-            this.title = entries[1];
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof Song))
-                return false;
-
-            Song obj = (Song) o;
-            return (this.artist.equals(obj.artist) && this.title.equals(obj.title));
-        }
-
-        @Override
-        public int hashCode() {
-            return String.format("%s - %s", artist, title).hashCode();
-        }
+      this.artist = entries[0];
+      this.title = entries[1];
     }
 
-    @Autowired
-    public OnlineRadioBox(@Value("${online_radio_box.host}") String host) {
-        this(host, HttpClient.newHttpClient());
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof Song))
+        return false;
+
+      Song obj = (Song) o;
+      return (this.artist.equals(obj.artist) && this.title.equals(obj.title));
     }
 
-    public OnlineRadioBox(String host, HttpClient httpClient) {
-        mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    @Override
+    public int hashCode() {
+      return String.format("%s - %s", artist, title).hashCode();
+    }
+  }
 
-        this.host = host;
-        this.httpClient = httpClient;
+  @Autowired
+  public OnlineRadioBox(@Value("${online_radio_box.host}") String host) {
+    this(host, HttpClient.newHttpClient());
+  }
+
+  public OnlineRadioBox(String host, HttpClient httpClient) {
+    mapper = new ObjectMapper();
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
+    this.host = host;
+    this.httpClient = httpClient;
+  }
+
+  public List<SongRecord> getPlaylist(String id, int dayOffset)
+      throws IOException, InterruptedException, URISyntaxException {
+    PlaylistApiResponse response = callPlaylistApi(id, dayOffset);
+
+    Document doc = Jsoup.parse(response.data);
+    Elements elements = doc.selectFirst("table.tablelist-schedule").select("tr");
+
+    List<SongRecord> trackLists = new ArrayList<>();
+    elements.forEach(element -> {
+      logger.atInfo().addKeyValue("raw_element", element.html())
+          .log("raw track history item received");
+
+      String segmentText = element.select("td.track_history_item").text();
+      String[] segments = segmentText.split(" - ", 2);
+
+      Song song = (segments.length >= 2) ? new Song(segments[0], segments[1])
+          : new Song("non-artist", segments[0]);
+
+      trackLists.add(new SongRecord(song, element.select("span.time--schedule").text()));
+    });
+
+    return trackLists;
+  }
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private static class PlaylistApiResponse {
+    public String data;
+  }
+
+  private PlaylistApiResponse callPlaylistApi(String id, int dayOffset)
+      throws IOException, InterruptedException, URISyntaxException {
+    String dayOffsetUri = (dayOffset != 0) ? String.valueOf(dayOffset) : "";
+
+    URI uri = new URI(String.format("%s/id/%s/playlist/%s?%s", this.host, id, dayOffsetUri,
+        "ajax=1&tzLoc=Asia/Jakarta"));
+
+    HttpRequest request =
+        HttpRequest.newBuilder().uri(uri).GET().timeout(Duration.ofSeconds(10)).build();
+    HttpResponse<String> httpResponse = this.httpClient.send(request, BodyHandlers.ofString());
+
+    if (httpResponse.statusCode() != 200) {
+      int statusCode = httpResponse.statusCode();
+      throw new HttpServerErrorException(HttpStatusCode.valueOf(statusCode));
     }
 
-    public List<SongRecord> getPlaylist(String id, int dayOffset)
-            throws IOException, InterruptedException, URISyntaxException {
-        PlaylistAPIResponse response = callPlaylistAPI(id, dayOffset);
+    String responsePayload = httpResponse.body();
+    PlaylistApiResponse response = mapper.readValue(responsePayload, PlaylistApiResponse.class);
 
-        Document doc = Jsoup.parse(response.data);
-        Elements elements = doc.selectFirst("table.tablelist-schedule").select("tr");
+    logger.atInfo().addKeyValue("response", responsePayload).log("received response");
 
-        List<SongRecord> trackLists = new ArrayList<>();
-        elements.forEach(element -> {
-            logger.atInfo().addKeyValue("raw_element", element.html()).log("raw track history item received");
-
-            String segmentText = element.select("td.track_history_item").text();
-            String[] segments = segmentText.split(" - ", 2);
-
-            Song song = (segments.length >= 2) ? new Song(segments[0], segments[1])
-                    : new Song("non-artist", segments[0]);
-
-            trackLists.add(new SongRecord(
-                    song,
-                    element.select("span.time--schedule").text()));
-        });
-
-        return trackLists;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class PlaylistAPIResponse {
-        public String data;
-    }
-
-    private PlaylistAPIResponse callPlaylistAPI(String id, int dayOffset)
-            throws IOException, InterruptedException, URISyntaxException {
-        String dayOffsetURI = (dayOffset != 0) ? String.valueOf(dayOffset) : "";
-
-        URI uri = new URI(
-                String.format("%s/id/%s/playlist/%s?%s", this.host, id, dayOffsetURI, "ajax=1&tzLoc=Asia/Jakarta"));
-
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().timeout(Duration.ofSeconds(10)).build();
-        HttpResponse<String> httpResponse = this.httpClient.send(request, BodyHandlers.ofString());
-
-        if (httpResponse.statusCode() != 200) {
-            int statusCode = httpResponse.statusCode();
-            throw new HttpServerErrorException(HttpStatusCode.valueOf(statusCode));
-        }
-
-        String responsePayload = httpResponse.body();
-        PlaylistAPIResponse response = mapper.readValue(responsePayload, PlaylistAPIResponse.class);
-
-        logger.atInfo().addKeyValue("response", responsePayload).log("received response");
-
-        return response;
-    }
+    return response;
+  }
 }

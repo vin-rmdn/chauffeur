@@ -1,9 +1,18 @@
 {
-    "java.project.sourcePaths": [
-        "app/src/main/java",
-        "app/src/test/java"
-    ],
-    "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "gradle.javaDebug.cleanOutput": true
+  "java.project.sourcePaths": [
+    "app/src/main/java",
+    "app/src/test/java"
+  ],
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "gradle.javaDebug.cleanOutput": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "[java]": {
+    "editor.insertSpaces": true
+  },
+  "java.checkstyle.configuration": "${workspaceFolder}/app/config/checkstyle/checkstyle.xml",
+  "java.checkstyle.version": "13.3.0",
+  "java.format.settings.url": ".vscode/java-formatter.xml",
 }
