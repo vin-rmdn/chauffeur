@@ -21,7 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(RadioController.class)
-public class RadioTest {
+public class RadioControllerTest {
   @Autowired
   MockMvc mockMvc;
 
@@ -33,8 +33,8 @@ public class RadioTest {
 
   @Test
   void getRadioPlaylist_Successful() throws Exception {
-    List<SongRecord> mockSongRecords =
-        List.of(new SongRecord(new Song("Artist", "Title"), "09:00"));
+    List<SongRecord> mockSongRecords = List
+        .of(new SongRecord(new Song("Artist", "Title"), "09:00"));
     when(radioService.getPlaylists("test-id", 0)).thenReturn(mockSongRecords);
 
     String expectedContentTemplate = new String(Files.readAllBytes(Paths.get(
