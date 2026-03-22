@@ -60,37 +60,38 @@ public class Discord implements CommandLineRunner {
         .log("receiving message");
 
     ThreadChannel thread;
-    if (channel instanceof ThreadChannel)
-      thread = (ThreadChannel) channel;
-    else
-      thread = message
-          .createPublicThread(String.format("%s (%s)", content, message.getTimestamp().toString()))
-          .block();
+    switch (channel) {
+    case ThreadChannel tc -> thread = tc;
+    default -> thread = message
+        .createPublicThread(String.format("%s (%s)", content, message.getTimestamp().toString()))
+        .block();
+    }
+
     logger.atInfo().addKeyValue("thread_id", thread.getId().asLong()).log("Thread created");
 
     switch (content) {
-      case "hi":
-        reply(message, thread, "https://nohello.net");
+    case "hi":
+      reply(message, thread, "https://nohello.net");
 
-        break;
-      case "!subscribe":
-        try {
-          service.subscribe(user.get().getId());
-        } catch (SQLException e) {
-          reply(message, thread, "Failed to subscribe: %s".formatted(e.getMessage()));
+      break;
+    case "!subscribe":
+      try {
+        service.subscribe(user.get().getId());
+      } catch (SQLException e) {
+        reply(message, thread, "Failed to subscribe: %s".formatted(e.getMessage()));
 
-          return;
-        }
+        return;
+      }
 
-        reply(message, thread, "Subscribed!");
-        break;
+      reply(message, thread, "Subscribed!");
+      break;
 
-      // Add more commands here
+    // Add more commands here
 
-      default:
-        reply(message, thread, "Lo siento, no entiendo ese comando.");
+    default:
+      reply(message, thread, "Lo siento, no entiendo ese comando.");
 
-        break;
+      break;
     }
   }
 
@@ -108,8 +109,8 @@ public class Discord implements CommandLineRunner {
 
     MessageCreateMono msg = thread.createMessage(content);
     if (insideThread) {
-      MessageReferenceData reference =
-          MessageReferenceData.builder().messageId(original.getId().asLong()).build();
+      MessageReferenceData reference = MessageReferenceData.builder()
+          .messageId(original.getId().asLong()).build();
 
       msg = msg.withMessageReference(reference);
     }
