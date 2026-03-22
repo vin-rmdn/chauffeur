@@ -14,7 +14,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"chauffeur.controller"})
+@ComponentScan(basePackages = { "chauffeur.controller" })
 public class App {
   static final Logger logger = LoggerFactory.getLogger(App.class);
 
@@ -24,15 +24,10 @@ public class App {
     logger.info("Active profile: {}", profile);
 
     switch (profile) {
-      case "server":
-        new SpringApplicationBuilder(Controller.class).profiles("server").run(args);
-        break;
-      case "worker":
-        new SpringApplicationBuilder(Discord.class).web(WebApplicationType.NONE).profiles("worker")
-            .run(args);
-        break;
-      default:
-        logger.error("Unknown profile: {}", profile);
+    case "server" -> new SpringApplicationBuilder(Controller.class).profiles("server").run(args);
+    case "worker" -> new SpringApplicationBuilder(Discord.class).web(WebApplicationType.NONE)
+        .profiles("worker").run(args);
+    default -> logger.error("Unknown profile: {}", profile);
     }
   }
 }
