@@ -15,6 +15,9 @@ spring:
     username: chauffeur 
     password: fake-password # Change this to your actual password
     driver-class-name: org.postgresql.Driver
+  threads:
+    virtual:
+      enabled: true
 radio:
   excluded_artists: SWEEPER, foo
   excluded_titles: spot, foo
