@@ -1,25 +1,25 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Server",
-            "request": "launch",
-            "mainClass": "chauffeur.App",
-            "console": "internalConsole",
-            "args": [
-                "-Dspring.profiles.active=server"
-            ]
-        },
-        {
-            "type": "java",
-            "name": "Worker",
-            "request": "launch",
-            "mainClass": "chauffeur.App",
-            "console": "internalConsole",
-            "args": [
-                "-Dspring.profiles.active=worker"
-            ]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Server",
+      "request": "launch",
+      "mainClass": "chauffeur.App",
+      "console": "internalConsole",
+      "args": [
+        "server"
+      ]
+    },
+    {
+      "type": "java",
+      "name": "Worker",
+      "request": "launch",
+      "mainClass": "chauffeur.App",
+      "console": "internalConsole",
+      "args": [
+        "worker"
+      ]
+    }
+  ]
 }
