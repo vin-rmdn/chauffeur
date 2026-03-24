@@ -6,5 +6,7 @@
   <suppress checks="MissingJavadocMethod" />
   <suppress checks="TextBlockGoogleStyleFormatting" />
   <suppress checks="NeedBraces" />
+  <suppress checks="Indentation" /> <!-- For some reason, indentation check fails for modern switch
+  expressions -->
   <suppress checks="MethodName" files=".+Test.java" />
 </suppressions>
