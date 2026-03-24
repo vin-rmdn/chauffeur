@@ -11,23 +11,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "chauffeur.controller" })
+// @ComponentScan(basePackages = { "chauffeur.controller" })
 public class App {
   static final Logger logger = LoggerFactory.getLogger(App.class);
 
   public static void main(String[] args) {
-    String profile = System.getProperty("spring.profiles.active",
-        System.getenv().getOrDefault("SPRING_PROFILES_ACTIVE", "server"));
-    logger.info("Active profile: {}", profile);
+    if (args.length < 1) {
+      logger.error("Please specify the process to run within the parameter: server or worker");
 
-    switch (profile) {
-    case "server" -> new SpringApplicationBuilder(Controller.class).profiles("server").run(args);
+      return;
+    }
+
+    switch (args[0]) {
+    case "server" -> new SpringApplicationBuilder(Controller.class).run(args);
     case "worker" -> new SpringApplicationBuilder(Discord.class).web(WebApplicationType.NONE)
-        .profiles("worker").run(args);
-    default -> logger.error("Unknown profile: {}", profile);
+        .run(args);
+    default -> logger.error(
+        "Unknown process: {}. Please specify the process to run within the parameter: server or worker",
+        args[0]);
     }
   }
 }
